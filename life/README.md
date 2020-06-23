@@ -9,3 +9,11 @@ I took the loop function from <https://love2d.org/wiki/love.run> which is the no
 On the other tutorial I checked the usage - it listens for interaction events constantly (without the mitigation I spec'd above), and there is a detailed background image. If I hold down the mouse, it causes stamps to appear at the same rate as the refresh rate, creating a large array of a single image to be redrawn over-and-over. (current state at commit `e96637b`)
 
 However, it uses hardly any CPU for this. I am thinking of further refactoring the Life example to minimize a number of dereferences to cmopare its effect on CPU usage
+
+EDIT - nope. the rectangle draw seems to be the main intensifier. Turning off that specific action, even when looping at full-pelt, takes only as much as 30%+ CPU whereas the same situation with drawing switched on pushes CPU to 97% ...
+
+Lessons learned:
+
+* It is possible to override the main loop for CPU usage reduction
+* Drawing lots of rectangles is costly
+* Constantly re-drawing a background image is not as expensive as I had thought

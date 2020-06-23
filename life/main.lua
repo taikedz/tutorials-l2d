@@ -7,8 +7,8 @@ function love.load()
 
     cellSize = 5
     
-    gridXCount = 400
-    gridYCount = 300
+    gridXCount = 140
+    gridYCount = 100
 
     life.grid = {}
     for y = 1, gridYCount do
@@ -24,11 +24,17 @@ function love.load()
 end
 
 function love.update(dt)
-    selectedX = math.floor(love.mouse.getX() / cellSize) + 1
-    selectedY = math.floor(love.mouse.getY() / cellSize) + 1
+    m_floor = math.floor
+    lm_isDown = love.mouse.isDown
 
-    local left_click = love.mouse.isDown(1)
-    local right_click = love.mouse.isDown(2)
+    mouseX = love.mouse.getX()
+    mouseY = love.mouse.getY()
+
+    selectedX = m_floor(mouseX / cellSize) + 1
+    selectedY = m_floor(mouseY / cellSize) + 1
+
+    local left_click = lm_isDown(1)
+    local right_click = lm_isDown(2)
     
     if left_click or right_click then
         life.redraw = true
@@ -53,28 +59,54 @@ function love.update(dt)
 end
 
 function love.draw()
+    local lg_setColor = love.graphics.setColor
+    local lg_rectangle = love.graphics.rectangle
+
+    local green_base = 100
+    local green_top = 150
+    local green_step = 5
+    if not life.green_counter then
+        life.green_counter = green_base
+    else
+        if not variant then variant = green_step
+        elseif life.green_counter > green_top
+            or life.green_counter < green_base
+            then variant = -variant
+        end
+        life.green_counter = (life.green_counter + variant)
+    end
+
     for y = 1, gridYCount do
         for x = 1, gridXCount do
             local cellDrawSize = cellSize - 1
+            grid_y = life.grid[y]
 
             if x == selectedX and y == selectedY then
-                love.graphics.setColor(0, 1, 1)
-            elseif life.grid[y][x] then
-                love.graphics.setColor(0.2, 0.7, 0.5)
-            else
-                love.graphics.setColor(.86, .86, .86)
+                lg_setColor(0, 1, 1)
+
+            elseif grid_y[x] then -- alive
+                local clr = {r=0.2, g=0.7, b=0.5}
+                clr.r = x/gridXCount
+                clr.g = life.green_counter / 256
+                clr.b = y/gridYCount
+
+                lg_setColor(clr.r, clr.g, clr.b)
+
+            else -- dead
+                lg_setColor(.86, .86, .86)
             end
 
-            love.graphics.rectangle(
+            if false then -- turn off rectangle drawing for benchmarking
+            lg_rectangle(
                 'fill',
                 (x - 1) * cellSize,
                 (y - 1) * cellSize,
                 cellDrawSize,
                 cellDrawSize
             )
+            end
         end
     end
-    love.timer.sleep(0.01)
 end
 
 function life.nextGrid()
