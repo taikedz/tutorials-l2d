@@ -1,7 +1,7 @@
 Player = Sprite:extend()
 
 function Player:new(x, y, speed)
-    Sprite.new(self, "panda.png", x, y, speed)
+    Sprite.new(self, util.available_path({"panda.png"}), x, y, speed)
 end
 
 function Player:update(dt)
